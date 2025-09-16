@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ตรวจความสัมพันธ์การยื่นลดหย่อน (สไตล์สรรพากร)</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">$</div>
+        <div>
+          <h1>ตรวจความสัมพันธ์การยื่นลดหย่อน</h1>
+          <p class="muted">
+            พิมพ์รายการหัวข้อย่อย เช่น “ซื้อหนังสือ” แล้วกดตรวจสอบ (Groupหลัก
+            1-5 หมายถึง 1.การลดหย่อนส่วนตัว 2.ลดหย่อนการลงทุน
+            3.ลดหย่อนตามนโยบายของรัฐ 4.Easy e-receipt 5.การบริจาค)
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="container">
+      <section class="card">
+        <!-- Input container -->
+        <div id="keyword-container">
+          <div class="kw-row">
+            <input
+              type="text"
+              class="kw-input"
+              placeholder="เช่น ซื้อหนังสือ"
+            />
+            <button type="button" onclick="removeRow(this)">ลบ</button>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="input-actions">
+          <button type="button" onclick="addRow()">+ เพิ่มช่อง</button>
+          <button type="button" id="checkBtn">ตรวจสอบ</button>
+        </div>
+
+        <!-- Tip -->
+        <div class="tip">
+          แสดงผลเฉพาะรายการที่มี <b>ทุกคำที่ใส่</b> เท่านั้น จัดเรียงจาก
+          <b>Support</b> มาก → น้อย (ถ้าเท่ากันใช้ <b>Confidence</b>)
+        </div>
+
+        <!-- Result -->
+        <div id="result" class="result"></div>
+      </section>
+    </main>
+
+    <!-- Script -->
+    <script>
+      // ===== Utility =====
+      function toPct(x) {
+        if (x == null || isNaN(x)) return "-";
+        return (x * 100).toFixed(2) + "%";
+      }
+
+      function norm(str) {
+        return (str || "").toString().trim().toLowerCase();
+      }
+
+      function renderRow(label, support, conf, groups) {
+        return `
+        <div class="row">
+          <div class="col-name">${label}</div>
+          <div class="col-metric"><span class="badge">Support</span> ${toPct(
+            support
+          )}</div>
+          <div class="col-metric"><span class="badge">Confidence</span> ${toPct(
+            conf
+          )}</div>
+          <div class="col-metric"><span class="badge">Group</span> ${groups
+            .filter(Boolean)
+            .join(", ")}</div>
+        </div>
+      `;
+      }
+
+      // ===== Dynamic input handling =====
+      function addRow() {
+        const div = document.createElement("div");
+        div.className = "kw-row";
+        div.innerHTML = `
+        <input type="text" class="kw-input" placeholder="เช่น E-book" />
+        <button type="button" onclick="removeRow(this)">ลบ</button>
+      `;
+        document.getElementById("keyword-container").appendChild(div);
+      }
+
+      function removeRow(btn) {
+        btn.parentElement.remove();
+      }
+
+      function getKeywords() {
+        return Array.from(document.querySelectorAll(".kw-input"))
+          .map((i) => i.value.trim())
+          .filter(Boolean)
+          .map(norm);
+      }
+
+      // ===== Main check function =====
+      function checkRelatedAll(keywords, data) {
+        const resultBox = document.getElementById("result");
+        resultBox.innerHTML = "";
+
+        if (keywords.length === 0) {
+          resultBox.innerHTML = `<div class="empty">กรุณาใส่อย่างน้อย 1 คำ</div>`;
+          return;
+        }
+
+        // รวม support1, support2, support3 เป็นรายการเดียวเพื่อค้นหา
+        const allRecords = [
+          ...(Array.isArray(data.support1)
+            ? data.support1.map((r) => ({
+                items: [r.Item],
+                Support: r.Support,
+                Confidence: r.Confidence,
+                Groups: [r.Group || "-"], // ✅ กันค่า null/undefined
+              }))
+            : []),
+          ...(Array.isArray(data.support2)
+            ? data.support2.map((r) => ({
+                items: [r.Item1, r.Item2],
+                Support: r.Support,
+                Confidence: r.Confidence,
+                Groups: [r.Groupt1 || "-", r.Groupt2 || "-"],
+              }))
+            : []),
+          ...(Array.isArray(data.support3)
+            ? data.support3.map((r) => ({
+                items: [r.Item, r.Item2, r.Item3],
+                Support: r.Support,
+                Confidence: r.Confidence,
+                Groups: [r.Groupt1 || "-", r.Groupt2 || "-", r.Groupt3 || "-"],
+              }))
+            : []),
+        ];
+
+        // ค้นหาแบบ AND: ต้องมีทุกคำใน keywords
+        const filtered = allRecords
+          .filter((r) => keywords.every((k) => r.items.map(norm).includes(k)))
+          .sort(
+            (a, b) =>
+              b.Support - a.Support || (b.Confidence ?? 0) - (a.Confidence ?? 0)
+          );
+
+        if (filtered.length === 0) {
+          resultBox.innerHTML = `<div class="empty">ไม่พบข้อมูลที่ตรงกับทุกคำที่กรอก</div>`;
+          return;
+        }
+
+        // แสดงผล
+        filtered.forEach((r) => {
+          const label = `มีรายการ: ${r.items.join(", ")}`;
+          resultBox.insertAdjacentHTML(
+            "beforeend",
+            renderRow(label, r.Support, r.Confidence, r.Groups)
+          );
+        });
+      }
+
+      // ===== Fetch JSON =====
+      let supportData = null;
+      fetch("support_data.json")
+        .then((res) =>
+          res.ok ? res.json() : Promise.reject(`HTTP ${res.status}`)
+        )
+        .then((data) => {
+          supportData = data;
+        })
+        .catch((err) => {
+          console.error("โหลดข้อมูลล้มเหลว:", err);
+          document.getElementById(
+            "result"
+          ).innerHTML = `<div class="empty">โหลดข้อมูลไม่สำเร็จ</div>`;
+        });
+
+      // ===== Bind button =====
+      document.getElementById("checkBtn").addEventListener("click", () => {
+        if (!supportData) {
+          document.getElementById(
+            "result"
+          ).innerHTML = `<div class="empty">กำลังโหลดข้อมูล...</div>`;
+          return;
+        }
+        const kws = getKeywords();
+        checkRelatedAll(kws, supportData);
+      });
+    </script>
+  </body>
+</html>
