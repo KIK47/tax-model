@@ -149,7 +149,7 @@ summary{ cursor:pointer; }
 
 /* ===== Footer ด้านล่าง ===== */
 .app-footer {
-  padding: 10px;
+  padding: 4px;
   font-size: 0.85rem;
   background: var(--card); /* ✅ ใช้ดำเข้มแบบการ์ด */
   color: var(--muted);     /* สีตัวอักษรเทาอ่อนเหมือนข้อความอธิบาย */
