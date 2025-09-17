@@ -19,6 +19,8 @@ body{
               radial-gradient(1200px 600px at -10% 110%, rgba(0,209,178,.15), transparent),
               var(--bg);
   color:var(--text);
+  display: flex;
+  flex-direction: column;
 }
 
 .app-header{
@@ -42,6 +44,7 @@ h1{font-size:1.25rem; margin:0}
 
 .container{
   max-width:1000px; margin:24px auto; padding:0 16px;
+  flex: 1;
 }
 
 .card{
@@ -143,3 +146,24 @@ details{
   padding:12px 14px; border:1px solid var(--border); border-radius:12px; background:#0f1318;
 }
 summary{ cursor:pointer; }
+
+/* ===== Footer ด้านล่าง ===== */
+.app-footer {
+  padding: 10px;
+  font-size: 0.85rem;
+  background: var(--card); /* ✅ ใช้ดำเข้มแบบการ์ด */
+  color: var(--muted);     /* สีตัวอักษรเทาอ่อนเหมือนข้อความอธิบาย */
+  margin-top: auto;
+}
+
+.footer-text {
+  margin: 0;
+  text-align: left;
+  padding-left: 4em;    /* ดันทุกบรรทัดเข้ามา */
+  text-indent: -3.3em;    /* ดึงบรรทัดแรกกลับออกไป */
+  line-height: 1.6;
+}
+
+
+
+
