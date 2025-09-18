@@ -65,7 +65,8 @@ h1{font-size:1.25rem; margin:0}
 }
 .kw-input{
   flex:1 1 360px;
-  background:#0f1318; color:var(--text);
+  background:#ffffff;    /* ✅ พื้นหลังขาว */
+  color:#000000;         /* ✅ ตัวหนังสือดำ */
   border:1px solid var(--border);
   border-radius:14px; padding:14px 16px; font-size:1rem;
   outline:none;
@@ -73,6 +74,8 @@ h1{font-size:1.25rem; margin:0}
 .kw-input:focus{
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(124,92,255,.15);
+  background:#ffffff;    /* ✅ focus ก็ยังขาว */
+  color:#000000;
 }
 
 /* ปุ่มสีม่วง */
@@ -164,6 +167,29 @@ summary{ cursor:pointer; }
   line-height: 1.6;
 }
 
+/* ===== Dropdown สีม่วง + กรอบ ===== */
+select.custom-dropdown {
+  background: var(--accent);   /* พื้นหลังม่วง */
+  color: #fff;                 /* ตัวอักษรขาว */
+  border: 2px solid #9a6bff;   /* ✅ กรอบม่วงอ่อน */
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  appearance: none;            /* ซ่อน default ลูกศรของ browser */
+  position: relative;
+}
 
+/* ให้ดูมีลูกศรเองแบบ custom */
+select.custom-dropdown {
+  background: var(--accent);   /* สีพื้นหลังม่วง */
+  color: #fff;                 /* ตัวหนังสือขาว */
+  border: 2px solid #9a6bff;   /* กรอบม่วงอ่อน */
+  border-radius: 10px;
+  padding: 10px 14px;
+}
 
-
+select.custom-dropdown option {
+  background: #12161b;   /* พื้นหลังดำเข้ม */
+  color: #fff;           /* ตัวหนังสือขาว */
+}

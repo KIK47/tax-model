@@ -33,10 +33,14 @@
               type="text"
               class="kw-input"
               placeholder="เช่น ซื้อหนังสือ"
+              list="suggestions"
             />
             <button type="button" onclick="removeRow(this)">ลบ</button>
           </div>
         </div>
+
+        <!-- datalist สำหรับ dropdown -->
+        <datalist id="suggestions"></datalist>
 
         <!-- Buttons -->
         <div class="input-actions">
@@ -89,7 +93,7 @@
         const div = document.createElement("div");
         div.className = "kw-row";
         div.innerHTML = `
-        <input type="text" class="kw-input" placeholder="เช่น E-book" />
+        <input type="text" class="kw-input" placeholder="เช่น E-book" list="suggestions" />
         <button type="button" onclick="removeRow(this)">ลบ</button>
       `;
         document.getElementById("keyword-container").appendChild(div);
@@ -116,14 +120,13 @@
           return;
         }
 
-        // รวม support1, support2, support3 เป็นรายการเดียวเพื่อค้นหา
         const allRecords = [
           ...(Array.isArray(data.support1)
             ? data.support1.map((r) => ({
                 items: [r.Item],
                 Support: r.Support,
                 Confidence: r.Confidence,
-                Groups: [r.Group || "-"], // ✅ กันค่า null/undefined
+                Groups: [r.Group || "-"],
               }))
             : []),
           ...(Array.isArray(data.support2)
@@ -144,7 +147,6 @@
             : []),
         ];
 
-        // ค้นหาแบบ AND: ต้องมีทุกคำใน keywords
         const filtered = allRecords
           .filter((r) => keywords.every((k) => r.items.map(norm).includes(k)))
           .sort(
@@ -157,7 +159,6 @@
           return;
         }
 
-        // แสดงผล
         filtered.forEach((r) => {
           const label = `มีรายการ: ${r.items.join(", ")}`;
           resultBox.insertAdjacentHTML(
@@ -175,6 +176,19 @@
         )
         .then((data) => {
           supportData = data;
+
+          // ✅ เติม dropdown จาก support1
+          if (Array.isArray(data.support1)) {
+            const dl = document.getElementById("suggestions");
+            dl.innerHTML = "";
+            data.support1.forEach((r) => {
+              if (r.Item) {
+                const option = document.createElement("option");
+                option.value = r.Item;
+                dl.appendChild(option);
+              }
+            });
+          }
         })
         .catch((err) => {
           console.error("โหลดข้อมูลล้มเหลว:", err);
