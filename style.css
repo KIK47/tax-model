@@ -159,13 +159,13 @@ summary{ cursor:pointer; }
   margin-top: auto;
 }
 
-.footer-text {
+/* .footer-text {
   margin: 0;
   text-align: left;
-  padding-left: 4em;    /* ดันทุกบรรทัดเข้ามา */
-  text-indent: -3.3em;    /* ดึงบรรทัดแรกกลับออกไป */
+  padding-left: 4em;    
+  text-indent: -3.3em;   
   line-height: 1.6;
-}
+} */
 
 /* ===== Dropdown สีม่วง + กรอบ ===== */
 select.custom-dropdown {
